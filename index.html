@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mosaic - Mindmap Tool</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas for PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <!-- Background Video -->
+    <video autoplay muted loop id="background-video">
+        <source src="images/bg-pattern.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Welcome Modal -->
+    <div id="welcome-modal" class="modal active">
+        <div class="modal-content">
+            <!-- Language Selector Clone -->
+            <div id="welcome-language-selector-clone" class="welcome-lang-clone">
+                <i class="fas fa-globe"></i>
+                <span class="current-language">EN</span>
+                <div class="language-options">
+                    <div class="language-option" data-lang="en">English</div>
+                    <div class="language-option" data-lang="es">Español</div>
+                    <div class="language-option" data-lang="fr">Français</div>
+                    <div class="language-option" data-lang="de">Deutsch</div>
+                    <div class="language-option" data-lang="tr">Türkçe</div>
+                </div>
+            </div>
+
+            <!-- Added Close Button (Initially Hidden) -->
+            <span id="welcome-modal-close-btn" class="close-modal welcome-close-override">&times;</span>
+
+            <img src="images/cover.jpg" alt="Mosaic Cover" class="cover-image">
+            <div class="modal-body">
+                <p data-translate="welcomeDescription">Create meaningful concept maps with Mosaic's intuitive interface.
+                </p>
+
+                <!-- Original Welcome Options (hidden when signed in) -->
+                <div class="welcome-options">
+                    <button id="new-project-btn" class="primary-btn">
+                        <i class="fas fa-plus-circle"></i> Yeni Proje Oluştur
+                    </button>
+                    <button id="open-project-btn" class="secondary-btn">
+                        <i class="fas fa-folder-open"></i> Open Existing Project
+                    </button>
+                    <hr class="divider">
+                    <button id="google-signin-btn" class="google-btn" disabled>
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="18px" height="18px"
+                            viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            style="display: block; margin-right: 10px;">
+                            <g>
+                                <path fill="#EA4335"
+                                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                </path>
+                                <path fill="#4285F4"
+                                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                </path>
+                                <path fill="#FBBC05"
+                                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                </path>
+                                <path fill="#34A853"
+                                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                </path>
+                                <path fill="none" d="M0 0h48v48H0z"></path>
+                            </g>
+                        </svg>
+                        Sign in with Google
+                    </button>
+                </div>
+
+                <!-- Google Drive Dashboard (shown when signed in) -->
+                <div id="drive-dashboard" style="display: none;">
+                    <h3 class="drive-title" data-translate="googleDriveProjectsTitle">Google Drive Projects</h3>
+                    <div id="drive-file-list" class="drive-list-container">
+                        <p class="drive-loading" data-translate="driveLoadingProjects">Loading projects...</p>
+                    </div>
+                    <div class="drive-dashboard-actions">
+                        <button id="drive-new-project-btn" class="primary-btn" disabled
+                            data-translate="driveNewProject"> <!-- Start disabled -->
+                            <i class="fas fa-plus-circle"></i> New Project
+                        </button>
+                        <button id="drive-upload-btn" class="secondary-btn" disabled
+                            data-translate="driveUploadProject"> <!-- Start disabled -->
+                            <i class="fas fa-upload"></i> Upload Project
+                        </button>
+                        <button id="sign-out-btn" class="secondary-btn" disabled data-translate="signOut">
+                            <!-- Start disabled -->
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <p>Mosaic® by <a href="https://ad-nouveau.com/" target="_blank">Ad Nouveau</a> 2024 <span
+                        style="float:right;">V01.04.17</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Project Modal -->
+    <div id="new-project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Project</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="project-name">Project Name:</label>
+                    <input type="text" id="project-name" placeholder="Enter a name for your project">
+                </div>
+                <button id="create-project-btn" class="primary-btn">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container (Initially Hidden) -->
+    <div id="app-container" style="display: none;">
+        <!-- Canvas -->
+        <div id="canvas-wrapper">
+            <!-- Canvas structure will be created dynamically by JavaScript -->
+        </div>
+
+        <!-- UI Controls -->
+        <div id="file-name-display">Untitled</div>
+
+        <!-- Language Selector - REMOVED -->
+        <!-- 
+        <div id="language-selector" class="language-selector">
+            <i class="fas fa-globe"></i>
+            <span class="current-language">EN</span>
+            <div class="language-options">
+                <div class="language-option" data-lang="en">English</div>
+                <div class="language-option" data-lang="es">Español</div>
+                <div class="language-option" data-lang="fr">Français</div>
+                <div class="language-option" data-lang="de">Deutsch</div>
+                <div class="language-option" data-lang="tr">Türkçe</div>
+            </div>
+        </div>
+        -->
+
+        <button id="night-mode-toggle" class="control-btn" title="Toggle Night Mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+        <button id="fullscreen-toggle" class="control-btn" title="Toggle Fullscreen">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="fullscreen-enter">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="fullscreen-exit" style="display: none;">
+                <polyline points="4 14 10 14 10 20"></polyline>
+                <polyline points="20 10 14 10 14 4"></polyline>
+                <line x1="14" y1="10" x2="21" y2="3"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+        </button>
+
+        <!-- Menu Button and Dropdown -->
+        <button id="menu-button" class="hamburger-menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div id="dropdown-menu">
+            <button id="new-mosaic-btn">New Mosaic</button>
+            <button id="save-button">Save Project</button>
+            <button id="upload-button">Open Project</button>
+            <button id="export-button">Export as Image</button>
+            <button id="export-pdf-button">Export as PDF</button>
+            <button id="reset-canvas">Reset View</button>
+        </div>
+
+        <!-- Footer -->
+        <div id="footer-band">
+            Mosaic® by <a href="https://ad-nouveau.com/" target="_blank">Ad Nouveau</a> 2024 / V01.04.17
+        </div>
+
+        <!-- Connection Removal SVG -->
+        <svg id="removal-line"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1500;">
+            <line id="removal-path" stroke="#FF506B" stroke-width="2" stroke-dasharray="5,5" visibility="hidden"></line>
+        </svg>
+    </div>
+
+    <!-- Hidden file input for Drive upload - MOVED TO BODY END -->
+    <!-- <input type="file" id="drive-upload-input" accept=".mosaic,application/json" style="display: none;"> -->
+
+    <!-- Scripts -->
+    <script src="node_types/default.js"></script>
+    <script src="node_types/checklist.js"></script>
+    <script src="node_types/timer.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/nodes.js"></script>
+    <script src="js/connections.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/file-management.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/viewport-manager.js"></script>
+    <script src="js/main.js"></script>
+
+    <!-- Google API Client Library (GAPI) for Drive API calls -->
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <!-- Google Identity Services Library (GIS) for Sign-In & Token -->
+    <script src="https://accounts.google.com/gsi/client" async defer onload="window.onGoogleLibraryLoad()"></script>
+
+    <!-- Place hidden input at the end of body for better persistence -->
+    <input type="file" id="drive-upload-input" accept=".mosaic,application/json" style="display: none;">
+</body>
+
+</html>
