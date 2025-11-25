@@ -31,14 +31,14 @@ function initApp() {
     }
     // -------------------------------------
 
+    // Initialize Night Mode early so welcome screen respects it
+    initNightMode();
+
     // Initialize UI first to show modal before canvas setup
     initUI(); // This will show the welcome modal
 
     // Initialize file management early to handle open actions
     initFileManagement();
-
-    // Initialize Night Mode early so welcome screen respects it
-    initNightMode();
 
     // Defer main UI initialization until a project is created/opened
     // initCanvas();
@@ -78,6 +78,11 @@ function initializeAppUI() {
     // Initialize Viewport Manager for performance optimization
     if (window.viewportManager) {
         window.viewportManager.init();
+    }
+
+    // Initialize Action Bar
+    if (window.actionBar) {
+        window.actionBar.init();
     }
 
     initNightMode(); // Initialize here if deferred
@@ -145,33 +150,55 @@ function detectSystemLanguage() {
 }
 
 // Fix UI controls to ensure they're visible after canvas initialization
+// Fix UI controls to ensure they're visible after canvas initialization
 function fixUIControls() {
-    // Clear any previous UI container
-    const existingContainer = document.getElementById('ui-controls-container');
-    if (existingContainer) {
-        existingContainer.remove();
+    // Check for existing container
+    let uiContainer = document.getElementById('ui-controls-container');
+
+    if (!uiContainer) {
+        // Create a UI container to hold all controls with high z-index
+        uiContainer = document.createElement('div');
+        uiContainer.id = 'ui-controls-container';
+        uiContainer.style.position = 'fixed';
+        uiContainer.style.top = '0';
+        uiContainer.style.left = '0';
+        uiContainer.style.width = '100%';
+        uiContainer.style.height = '100%';
+        uiContainer.style.pointerEvents = 'none';
+        uiContainer.style.zIndex = '1500'; // Higher z-index
+
+        // Add UI container to body
+        document.body.appendChild(uiContainer);
     }
-
-    // Create a UI container to hold all controls with high z-index
-    const uiContainer = document.createElement('div');
-    uiContainer.id = 'ui-controls-container';
-    uiContainer.style.position = 'fixed';
-    uiContainer.style.top = '0';
-    uiContainer.style.left = '0';
-    uiContainer.style.width = '100%';
-    uiContainer.style.height = '100%';
-    uiContainer.style.pointerEvents = 'none';
-    uiContainer.style.zIndex = '1500'; // Higher z-index
-
-    // Add UI container to body
-    document.body.appendChild(uiContainer);
 
     // Move all UI controls to the container
     moveControlToContainer('night-mode-toggle', uiContainer);
     moveControlToContainer('fullscreen-toggle', uiContainer);
     moveControlToContainer('language-selector', uiContainer);
     moveControlToContainer('menu-button', uiContainer);
+
     moveControlToContainer('file-name-display', uiContainer);
+
+    // Check for project tabs and move them too
+    let tabs = document.getElementById('project-tabs');
+
+    if (!tabs) {
+        console.warn('project-tabs not found in fixUIControls. Attempting to create...');
+        if (window.initFileManagement) {
+            window.initFileManagement();
+            tabs = document.getElementById('project-tabs');
+        }
+    }
+
+    if (tabs) {
+        moveControlToContainer('project-tabs', uiContainer);
+        // Force hide file-name-display if tabs exist
+        const fileNameDisplay = document.getElementById('file-name-display');
+        if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+    } else {
+        console.error('Failed to create project-tabs even after fallback.');
+    }
+
     moveControlToContainer('dropdown-menu', uiContainer);
     moveControlToContainer('footer-band', uiContainer);
 

@@ -15,6 +15,7 @@ class Project {
         this.name = name;
         this.nodes = nodes;
         this.connections = connections;
+        this.groups = []; // Initialize groups array
         this.canvasOffset = { x: 0, y: 0 };
         this.canvasScale = 1;
         this.driveFileId = null;
@@ -23,9 +24,13 @@ class Project {
 
 // Initialize file management
 function initFileManagement() {
+    console.log('[initFileManagement] Initializing...');
     // Create tabs container if it doesn't exist
     if (!document.getElementById('project-tabs')) {
+        console.log('[initFileManagement] Creating project tabs container...');
         createProjectTabsContainer();
+    } else {
+        console.log('[initFileManagement] Project tabs container already exists.');
     }
 
     // Do NOT create a default project here. Wait for user action.
@@ -43,10 +48,12 @@ function createProjectTabsContainer() {
     // Insert before the file name display
     const fileNameDisplay = document.getElementById('file-name-display');
     if (fileNameDisplay) {
+        console.log('[createProjectTabsContainer] Found file-name-display. Inserting tabs before it.');
         fileNameDisplay.parentNode.insertBefore(tabsContainer, fileNameDisplay);
         // Hide the original file name display as we'll now use tabs
         fileNameDisplay.style.display = 'none';
     } else {
+        console.warn('[createProjectTabsContainer] file-name-display NOT found. Inserting at body start.');
         // If no file name display, add to the start of body
         document.body.insertBefore(tabsContainer, document.body.firstChild);
     }
@@ -249,26 +256,46 @@ function saveProjectState(projectIndex) {
     // Log connection count
     console.log(`[saveProjectState] Captured ${project.connections.length} connections.`);
 
+    // Save groups
+    project.groups = [];
+    if (window.groups && window.groups.size > 0) {
+        window.groups.forEach((group, groupId) => {
+            project.groups.push({
+                id: group.id,
+                name: group.name,
+                color: group.color,
+                nodeIds: [...group.nodeIds], // Copy array
+                bounds: { ...group.bounds } // Copy bounds object
+            });
+        });
+        console.log(`[saveProjectState] Captured ${project.groups.length} groups.`);
+    } else {
+        console.log(`[saveProjectState] No groups to save.`);
+    }
+
     console.log(`Saved state for project ${project.name}: ${project.nodes.length} nodes, ${project.connections.length} connections`);
 }
 
-// Switch to a project
-function switchToProject(projectIndex) {
-    if (projectIndex < 0 || projectIndex >= projects.length) return;
-    console.log(`Attempting to switch to project index: ${projectIndex}`);
+// Switch to a specific project
+function switchToProject(index) {
+    if (index < 0 || !window.projects || index >= window.projects.length) return;
+
+    console.log(`[switchToProject] Attempting to switch to project index: ${index}`);
 
     // Initialize the main UI if it hasn't been initialized yet
-    let uiInitializedThisCall = false;
     const appContainer = document.getElementById('app-container');
     if (appContainer && appContainer.style.display === 'none') {
-        console.log("Initializing UI from switchToProject...");
+        console.log("[switchToProject] Initializing UI...");
         const video = document.getElementById('background-video');
 
         // Start background fade-in
         document.body.classList.add('app-active');
 
-        window.initializeAppUI();
-        uiInitializedThisCall = true;
+        if (window.initializeAppUI) {
+            window.initializeAppUI();
+        } else {
+            console.error("[switchToProject] initializeAppUI function not found!");
+        }
 
         // Remove video after fade-in transition (matches CSS transition duration)
         setTimeout(() => {
@@ -279,128 +306,210 @@ function switchToProject(projectIndex) {
         }, 500); // Corresponds to the 0.5s transition in CSS
     }
 
-    // Save the current project state (if one was active and UI was already initialized)
-    if (!uiInitializedThisCall && activeProjectIndex >= 0 && activeProjectIndex < projects.length) {
-        console.log(`Saving state for previous project index: ${activeProjectIndex}`);
-        saveProjectState(activeProjectIndex);
-    }
+    // Set flag to prevent auto-saves during restoration
+    window.isRestoringProject = true;
+    console.log('[switchToProject] Starting restoration. Auto-save disabled.');
 
-    // Set the new active project
-    activeProjectIndex = projectIndex;
-    const project = projects[activeProjectIndex];
+    try {
+        // Save current project state before switching (if not the one we're switching to)
+        if (activeProjectIndex >= 0 && activeProjectIndex !== index) {
+            saveProjectState(activeProjectIndex);
+        }
 
-    // Update current project name
-    currentProjectName = project.name;
+        activeProjectIndex = index;
+        const project = window.projects[index];
 
-    // Clear the current mindmap
-    clearMindMap();
+        // Update UI
+        document.getElementById('project-name').value = project.name;
+        updateProjectTabs();
 
-    // Restore canvas state
-    // Use default values carefully if project data is missing
-    const targetOffset = project.canvasOffset || { x: document.getElementById('canvas-wrapper').clientWidth / 2, y: document.getElementById('canvas-wrapper').clientHeight / 2 };
-    const targetScale = (project.canvasScale && project.canvasScale > 0) ? project.canvasScale : 1;
+        // Clear the current mindmap
+        clearMindMap();
 
-    console.log(`[switchToProject] Project '${project.name}': Restoring offset=`, targetOffset, `scale=`, targetScale);
+        // Restore canvas state
+        // Use default values carefully if project data is missing
+        const targetOffset = project.canvasOffset || { x: document.getElementById('canvas-wrapper').clientWidth / 2, y: document.getElementById('canvas-wrapper').clientHeight / 2 };
+        const targetScale = (project.canvasScale && project.canvasScale > 0) ? project.canvasScale : 1;
 
-    canvasOffset.x = targetOffset.x;
-    canvasOffset.y = targetOffset.y;
-    canvasScale = targetScale;
+        console.log(`[switchToProject] Project '${project.name}': Restoring offset=`, targetOffset, `scale=`, targetScale);
 
-    // Update the canvas transform and global variables
-    updateCanvasTransform();
+        canvasOffset.x = targetOffset.x;
+        canvasOffset.y = targetOffset.y;
+        canvasScale = targetScale;
 
-    console.log(`Switching to project '${project.name}' with state:`, project);
+        // Update the canvas transform and global variables
+        updateCanvasTransform();
 
-    // Load project data (Nodes and Connections) - Moved this block outside the if/else
-    // Load nodes first
-    if (Array.isArray(project.nodes) && project.nodes.length > 0) {
-        project.nodes.forEach(nodeData => {
-            // Ensure position values are numbers, reliably accessing the position object
-            const x = (typeof nodeData.position?.x === 'number') ? nodeData.position.x : 0;
-            const y = (typeof nodeData.position?.y === 'number') ? nodeData.position.y : 0;
+        console.log(`Switching to project '${project.name}' with state:`, project);
 
-            // Get other node data
-            const nodeType = nodeData.nodeType || 'default';
-            const stripColor = nodeData.stripColor;
-            const content = nodeData.content || (window.getPlaceholderText ? window.getPlaceholderText() : 'Double Click...');
-            const nodeId = nodeData.id;
-            const isContentOnly = nodeData.contentOnly; // Get content-only state
+        // Load nodes first
+        if (Array.isArray(project.nodes) && project.nodes.length > 0) {
+            project.nodes.forEach(nodeData => {
+                // Ensure position values are numbers, reliably accessing the position object
+                const x = (typeof nodeData.position?.x === 'number') ? nodeData.position.x : (typeof nodeData.x === 'number' ? nodeData.x : 0);
+                const y = (typeof nodeData.position?.y === 'number') ? nodeData.position.y : (typeof nodeData.y === 'number' ? nodeData.y : 0);
 
-            if (!nodeId) {
-                console.warn("Skipping node load because ID is missing:", nodeData);
-                return; // Skip node if ID is missing
-            }
+                // Get other node data
+                const nodeType = nodeData.nodeType || nodeData.type || 'default';
+                const stripColor = nodeData.stripColor || nodeData.color;
+                const content = nodeData.content || (window.getPlaceholderText ? window.getPlaceholderText() : 'Double Click...');
+                const nodeId = nodeData.id;
 
-            // Use createNode with all parameters
-            const node = window.createNode(
-                x,
-                y,
-                content,
-                nodeType,
-                nodeId,
-                stripColor
-            );
+                if (!nodeId) {
+                    console.warn("Skipping node load because ID is missing:", nodeData);
+                    return; // Skip node if ID is missing
+                }
 
-            // Restore content-only mode if applicable
-            if (node && isContentOnly) {
-                node.classList.add('content-only-mode');
-                // Also update the toggle button icon
-                const toggleBtn = node.querySelector('.node-visibility-toggle');
-                if (toggleBtn) {
-                    const icon = toggleBtn.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
-                        toggleBtn.title = 'Show node frame';
+                // Use createNode with all parameters
+                const node = window.createNode(
+                    x,
+                    y,
+                    content,
+                    nodeType,
+                    nodeId,
+                    stripColor
+                );
+
+                // Restore specific properties
+                if (nodeData.contentOnly && node) {
+                    node.classList.add('content-only-mode');
+                    const toggle = node.querySelector('.node-visibility-toggle i');
+                    if (toggle) {
+                        toggle.classList.remove('fa-eye');
+                        toggle.classList.add('fa-eye-slash');
                     }
                 }
-            }
-
-            // createNode should handle setting color and type internally
-            // No need for extra color setting steps here
-        });
-    } else {
-        // If no nodes exist, create a welcome node
-        if (window.createInitialNode) {
-            window.createInitialNode();
+            });
         } else {
-            console.warn('createInitialNode function not found.');
-        }
-    }
-
-    // Then load connections
-    if (Array.isArray(project.connections)) {
-        project.connections.forEach(conn => {
-            const startNode = document.getElementById(conn.startNode);
-            const endNode = document.getElementById(conn.endNode);
-
-            if (startNode && endNode && window.createFinalConnection) {
-                // Ensure createFinalConnection doesn't add history during load
-                const wasPerformingAction = window.actionHistory ? window.actionHistory.isPerformingAction : false;
-                if (window.actionHistory) window.actionHistory.isPerformingAction = true;
-
-                window.createFinalConnection(startNode, endNode, conn.startPin, conn.endPin);
-
-                if (window.actionHistory) window.actionHistory.isPerformingAction = wasPerformingAction;
-            } else if (!startNode || !endNode) {
-                console.warn('Could not find start or end node for connection:', conn);
+            // If no nodes exist, create a welcome node
+            if (window.createInitialNode) {
+                window.createInitialNode();
+            } else {
+                console.warn('createInitialNode function not found.');
             }
+        }
+
+        // Then load connections
+        if (Array.isArray(project.connections)) {
+            project.connections.forEach(conn => {
+                const startNode = document.getElementById(conn.startNode || conn.source);
+                const endNode = document.getElementById(conn.endNode || conn.target);
+
+                if (startNode && endNode && window.createFinalConnection) {
+                    // Ensure createFinalConnection doesn't add history during load
+                    const wasPerformingAction = window.actionHistory ? window.actionHistory.isPerformingAction : false;
+                    if (window.actionHistory) window.actionHistory.isPerformingAction = true;
+
+                    window.createFinalConnection(startNode, endNode, conn.startPin, conn.endPin);
+
+                    if (window.actionHistory) window.actionHistory.isPerformingAction = wasPerformingAction;
+                } else if (!startNode || !endNode) {
+                    console.warn('Could not find start or end node for connection:', conn);
+                }
+            });
+        }
+
+        // Call updateNodeConnections after nodes/connections are loaded
+        if (window.updateNodeConnections) {
+            console.log("[switchToProject] Calling updateNodeConnections after loading project elements.");
+            window.updateNodeConnections();
+        }
+
+        // Load groups AFTER nodes and connections
+        console.log('[switchToProject] Checking for groups...', {
+            hasGroupsArray: Array.isArray(project.groups),
+            groupsLength: project.groups?.length,
+            windowGroupsExists: !!window.groups,
+            renderGroupExists: !!window.renderGroup
         });
-    }
 
-    // --- MODIFICATION: Call updateNodeConnections after nodes/connections are loaded ---
-    if (window.updateNodeConnections) {
-        console.log("[switchToProject] Calling updateNodeConnections after loading project elements.");
-        window.updateNodeConnections();
-    }
-    // --- END MODIFICATION ---
+        if (Array.isArray(project.groups) && project.groups.length > 0) {
+            console.log(`[switchToProject] Starting group restoration for ${project.groups.length} groups`);
 
-    // Update the project tabs
-    updateProjectTabs();
+            if (!window.groups) {
+                console.error('[switchToProject] FATAL: window.groups Map not available!');
+                return;
+            }
 
-    // Clear action history for the loaded project
-    if (window.actionHistory) {
-        window.actionHistory.clear();
+            if (!window.renderGroup) {
+                console.error('[switchToProject] FATAL: window.renderGroup function not available!');
+                return;
+            }
+
+            // Clear existing groups
+            window.groups.clear();
+            console.log('[switchToProject] Cleared existing groups');
+
+            // Restore each group
+            let restoredCount = 0;
+            project.groups.forEach((groupData, index) => {
+                console.log(`[switchToProject] Restoring group ${index + 1}:`, {
+                    id: groupData.id,
+                    name: groupData.name,
+                    color: groupData.color,
+                    nodeIds: groupData.nodeIds,
+                    bounds: groupData.bounds
+                });
+
+                // Verify all nodes exist in DOM and filter out missing ones
+                const validNodeIds = groupData.nodeIds.filter(id => document.getElementById(id));
+                const missingNodes = groupData.nodeIds.filter(id => !document.getElementById(id));
+
+                if (missingNodes.length > 0) {
+                    console.warn(`[switchToProject] Group "${groupData.name}" has missing nodes:`, missingNodes);
+                }
+
+                // Create Group object
+                const group = {
+                    id: groupData.id,
+                    name: groupData.name,
+                    color: groupData.color,
+                    nodeIds: validNodeIds,
+                    bounds: groupData.bounds,
+                    element: null
+                };
+
+                // Add to groups map
+                window.groups.set(group.id, group);
+                console.log(`[switchToProject] Added group to Map. Map size: ${window.groups.size}`);
+
+                // Render the group
+                try {
+                    window.renderGroup(group);
+                    console.log(`[switchToProject] Successfully rendered group "${group.name}"`);
+
+                    // Verify element was created
+                    if (group.element) {
+                        console.log(`[switchToProject] Group element created:`, {
+                            id: group.element.id,
+                            className: group.element.className,
+                            parentNode: group.element.parentNode?.id
+                        });
+                        restoredCount++;
+                    } else {
+                        console.error(`[switchToProject] Group element NOT created for "${group.name}"`);
+                    }
+                } catch (error) {
+                    console.error(`[switchToProject] Error rendering group "${group.name}":`, error);
+                }
+            });
+
+            console.log(`[switchToProject] Group restoration complete. ${restoredCount}/${project.groups.length} groups rendered successfully. Map size: ${window.groups.size}`);
+        } else {
+            console.log('[switchToProject] No groups to restore');
+        }
+
+        // Clear history when switching projects
+        if (window.actionHistory) {
+            window.actionHistory.clear();
+        }
+
+        console.log(`Switched to project: ${project.name}`);
+
+    } finally {
+        // Re-enable auto-saves
+        window.isRestoringProject = false;
+        console.log('[switchToProject] Restoration complete. Auto-save re-enabled.');
     }
 }
 
@@ -411,7 +520,7 @@ function closeProject(projectIndex) {
     const closedProjectName = projects[projectIndex].name;
     console.log(`[closeProject] Closing project: '${closedProjectName}' at index ${projectIndex}`);
 
-    // --- MODIFICATION: Check if this is the last project ---
+    // Check if this is the last project
     if (projects.length === 1) {
         console.log("[closeProject] Attempting to close the last project, will refresh the application.");
 
@@ -525,7 +634,7 @@ function updateProjectTabs() {
             }
         });
 
-        // Show/hide edit button on hover
+        // Show/Hide edit button on hover
         tab.addEventListener('mouseenter', () => {
             editButton.style.visibility = 'visible';
         });
@@ -610,8 +719,6 @@ function updateProjectTabs() {
             console.log('[+] Tab: Signed in, showing Welcome Modal.');
             // If signed in, show Welcome Modal with Drive Dashboard
             const welcomeModal = document.getElementById('welcome-modal');
-            const appContainer = document.getElementById('app-container'); // Keep reference if needed
-            // Don't hide appContainer or video, show modal on top
 
             if (welcomeModal) {
                 // Ensure Drive Dashboard is shown and welcome options are hidden
@@ -927,6 +1034,22 @@ function openProject() {
                         projectData.nodes || [],
                         projectData.connections || []
                     );
+
+                    // Restore additional project properties
+                    if (projectData.canvasOffset) {
+                        project.canvasOffset = projectData.canvasOffset;
+                    }
+                    if (projectData.canvasScale) {
+                        project.canvasScale = projectData.canvasScale;
+                    }
+
+                    // CRITICAL: Restore groups data
+                    if (projectData.groups) {
+                        project.groups = projectData.groups;
+                        console.log(`[openProject] Loaded ${projectData.groups.length} groups from file`);
+                    } else {
+                        project.groups = [];
+                    }
 
                     // Add to projects array
                     projects.push(project);

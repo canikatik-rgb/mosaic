@@ -98,6 +98,19 @@ function initCanvas() {
         }
     });
 
+    // Handle click on canvas to deselect nodes
+    canvas.addEventListener('click', function (e) {
+        // Only clear if clicking directly on canvas or background
+        if (e.target.id === 'canvas' || e.target.id === 'canvas-background' || e.target.id === 'canvas-content') {
+            // Don't clear if we just finished a drag or shift selection
+            if (window.hasDragged || window.isShiftSelecting || window.justFinishedShiftSelection) return;
+
+            if (window.clearSelectedNodes) {
+                window.clearSelectedNodes();
+            }
+        }
+    });
+
     // Reset canvas button
     document.getElementById('reset-canvas').addEventListener('click', resetCanvasView);
 
@@ -178,10 +191,9 @@ function updateCanvasTransform() {
     canvasContent.style.transform = `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${canvasScale})`;
 
     // Transform background grid with offset modulo grid size for infinite effect
-    // This is key to the smooth background effect in the old version
     canvasBackground.style.transform = `translate(${canvasOffset.x % (20 * canvasScale)}px, ${canvasOffset.y % (20 * canvasScale)}px) scale(${canvasScale})`;
 
-    // Update global variables
+    // Update global variables - always sync TO window (window is a mirror of local state)
     window.canvasScale = canvasScale;
     window.canvasOffset = canvasOffset;
 

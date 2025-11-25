@@ -63,7 +63,25 @@ const translations = {
         driveNewProject: "New Project",
         signOut: "Sign Out",
         driveEmpty: "No Mosaic projects found in your Google Drive.",
-        driveUploadProject: "Upload Project"
+        driveUploadProject: "Upload Project",
+        // Action Bar
+        actionBarSpotlight: "Spotlight (Shift+A)",
+        actionBarColor: "Change Color",
+        actionBarVisibility: "Toggle Visibility",
+        actionBarGroup: "Group Nodes",
+        actionBarDelete: "Delete Selected",
+        actionBarSelected: "Selected",
+        // Command Palette
+        cpPlaceholder: "Type to search or create...",
+        cpCreateNew: "Create New",
+        cpGoToNode: "Go to Node",
+        cpNoResults: "No results found",
+        cpTextNode: "Text Node",
+        cpChecklist: "Checklist",
+        cpTimer: "Timer",
+        cpTextNodeDesc: "Simple text note",
+        cpChecklistDesc: "Track tasks",
+        cpTimerDesc: "Countdown timer"
     },
     es: {
         welcome: "Bienvenido a Mosaic",
@@ -120,7 +138,25 @@ const translations = {
         driveNewProject: "Nuevo Proyecto",
         signOut: "Cerrar Sesión",
         driveEmpty: "No se encontraron proyectos Mosaic en tu Google Drive.",
-        driveUploadProject: "Subir Proyecto"
+        driveUploadProject: "Subir Proyecto",
+        // Action Bar (Spanish)
+        actionBarSpotlight: "Spotlight (Shift+A)",
+        actionBarColor: "Cambiar Color",
+        actionBarVisibility: "Alternar Visibilidad",
+        actionBarGroup: "Agrupar Nodos",
+        actionBarDelete: "Eliminar Seleccionados",
+        actionBarSelected: "Seleccionado",
+        // Command Palette (Spanish)
+        cpPlaceholder: "Escribe para buscar o crear...",
+        cpCreateNew: "Crear Nuevo",
+        cpGoToNode: "Ir al Nodo",
+        cpNoResults: "No se encontraron resultados",
+        cpTextNode: "Nodo de Texto",
+        cpChecklist: "Lista de Verificación",
+        cpTimer: "Temporizador",
+        cpTextNodeDesc: "Nota de texto simple",
+        cpChecklistDesc: "Seguimiento de tareas",
+        cpTimerDesc: "Cuenta atrás"
     },
     fr: {
         welcome: "Bienvenue à Mosaic",
@@ -177,7 +213,25 @@ const translations = {
         driveNewProject: "Nouveau Projet",
         signOut: "Se Déconnecter",
         driveEmpty: "Aucun projet Mosaic trouvé dans votre Google Drive.",
-        driveUploadProject: "Téléverser Projet"
+        driveUploadProject: "Téléverser Projet",
+        // Action Bar (French)
+        actionBarSpotlight: "Spotlight (Shift+A)",
+        actionBarColor: "Changer Couleur",
+        actionBarVisibility: "Basculer Visibilité",
+        actionBarGroup: "Grouper Nœuds",
+        actionBarDelete: "Supprimer Sélection",
+        actionBarSelected: "Sélectionné",
+        // Command Palette (French)
+        cpPlaceholder: "Tapez pour chercher ou créer...",
+        cpCreateNew: "Créer Nouveau",
+        cpGoToNode: "Aller au Nœud",
+        cpNoResults: "Aucun résultat trouvé",
+        cpTextNode: "Nœud Texte",
+        cpChecklist: "Liste de Contrôle",
+        cpTimer: "Minuteur",
+        cpTextNodeDesc: "Note textuelle simple",
+        cpChecklistDesc: "Suivi des tâches",
+        cpTimerDesc: "Compte à rebours"
     },
     de: {
         welcome: "Willkommen bei Mosaic",
@@ -234,7 +288,25 @@ const translations = {
         driveNewProject: "Neues Projekt",
         signOut: "Abmelden",
         driveEmpty: "Keine Mosaic-Projekte in Ihrem Google Drive gefunden.",
-        driveUploadProject: "Projekt hochladen"
+        driveUploadProject: "Projekt hochladen",
+        // Action Bar (German)
+        actionBarSpotlight: "Spotlight (Shift+A)",
+        actionBarColor: "Farbe ändern",
+        actionBarVisibility: "Sichtbarkeit umschalten",
+        actionBarGroup: "Knoten gruppieren",
+        actionBarDelete: "Ausgewählte löschen",
+        actionBarSelected: "Ausgewählt",
+        // Command Palette (German)
+        cpPlaceholder: "Tippen zum Suchen oder Erstellen...",
+        cpCreateNew: "Neu erstellen",
+        cpGoToNode: "Gehe zu Knoten",
+        cpNoResults: "Keine Ergebnisse gefunden",
+        cpTextNode: "Textknoten",
+        cpChecklist: "Checkliste",
+        cpTimer: "Timer",
+        cpTextNodeDesc: "Einfache Textnotiz",
+        cpChecklistDesc: "Aufgaben verfolgen",
+        cpTimerDesc: "Countdown-Timer"
     },
     tr: {
         welcome: "Mosaic'e Hoş Geldiniz",
@@ -291,7 +363,25 @@ const translations = {
         driveNewProject: "Yeni Proje",
         signOut: "Oturumu Kapat",
         driveEmpty: "Google Drive'ınızda Mosaic projesi bulunamadı.",
-        driveUploadProject: "Proje Yükle"
+        driveUploadProject: "Proje Yükle",
+        // Action Bar (Turkish)
+        actionBarSpotlight: "Spotlight (Shift+A)",
+        actionBarColor: "Rengi Değiştir",
+        actionBarVisibility: "Görünürlüğü Aç/Kapat",
+        actionBarGroup: "Grupla",
+        actionBarDelete: "Seçilenleri Sil",
+        actionBarSelected: "Seçildi",
+        // Command Palette (Turkish)
+        cpPlaceholder: "Aramak veya oluşturmak için yazın...",
+        cpCreateNew: "Yeni Oluştur",
+        cpGoToNode: "Node'a Git",
+        cpNoResults: "Sonuç bulunamadı",
+        cpTextNode: "Metin Node",
+        cpChecklist: "Kontrol Listesi",
+        cpTimer: "Zamanlayıcı",
+        cpTextNodeDesc: "Basit metin notu",
+        cpChecklistDesc: "Görevleri takip et",
+        cpTimerDesc: "Geri sayım sayacı"
     }
 };
 
@@ -327,16 +417,16 @@ function initUI() {
     const resetCanvasBtn = document.getElementById('reset-canvas');
     const backToWelcomeBtn = document.querySelector('#new-project-modal .back-to-welcome'); // Get back button
     const googleSignInButton = document.getElementById('google-signin-btn'); // Get Google button
-    
+
     // Initialize with browser language if possible
     initLanguage();
-    
+
     // Setup welcome modal and project creation workflow
     // showModal(welcomeModal); // Don't show modal here, it starts active in HTML
     // if (welcomeModal.id === 'welcome-modal') { // Remove this block as well
     //     document.body.classList.add('showing-modal');
     // }
-    
+
     // Close modal buttons - Updated logic for new-project-modal close
     closeModalButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -359,17 +449,17 @@ function initUI() {
             }
         });
     });
-    
+
     // Removed event listener for backToWelcomeBtn as the button is removed from HTML
     // if (backToWelcomeBtn) { ... }
-    
+
     // New project button in welcome modal
     newProjectBtn.addEventListener('click', () => {
         hideModal(welcomeModal);
         showModal(newProjectModal);
         projectNameInput.focus();
     });
-    
+
     // Open existing project button in welcome modal
     openProjectBtn.addEventListener('click', () => {
         hideModal(welcomeModal);
@@ -377,7 +467,7 @@ function initUI() {
             openProject();
         }
     });
-    
+
     // Google Sign-In button in welcome modal
     if (googleSignInButton) {
         googleSignInButton.disabled = true; // Initially disable until auth libs load
@@ -392,34 +482,34 @@ function initUI() {
     } else {
         console.warn("Google Sign-In button not found in the DOM.");
     }
-    
+
     // Create project button in new project modal
     createProjectBtn.addEventListener('click', async () => {
         const projectName = projectNameInput.value.trim();
         if (projectName) {
             hideModal(newProjectModal);
-            
+
             // --- MODIFICATION: Check if creating for Drive ---
             if (window.isCreatingForDrive) {
-                 window.isCreatingForDrive = false; // Reset the flag immediately
+                window.isCreatingForDrive = false; // Reset the flag immediately
                 if (window.createAndSaveProjectToDrive && window.openProjectFromDrive) {
-                     // Show loading overlay while creating/opening
-                     if(window.showLoadingOverlay) window.showLoadingOverlay(getText('creatingDriveProject') || 'Creating project on Google Drive...');
+                    // Show loading overlay while creating/opening
+                    if (window.showLoadingOverlay) window.showLoadingOverlay(getText('creatingDriveProject') || 'Creating project on Google Drive...');
                     try {
-                         const driveFileId = await window.createAndSaveProjectToDrive(projectName);
-                         if (driveFileId) {
-                              console.log(`[Create Btn] Drive project created (ID: ${driveFileId}), now opening...`);
-                              await window.openProjectFromDrive(driveFileId);
-                              console.log(`[Create Btn] Successfully opened project from Drive.`);
-                         } else {
-                              console.error('[Create Btn] createAndSaveProjectToDrive did not return a file ID.');
-                              alert('Failed to create the project on Google Drive.');
-                         }
+                        const driveFileId = await window.createAndSaveProjectToDrive(projectName);
+                        if (driveFileId) {
+                            console.log(`[Create Btn] Drive project created (ID: ${driveFileId}), now opening...`);
+                            await window.openProjectFromDrive(driveFileId);
+                            console.log(`[Create Btn] Successfully opened project from Drive.`);
+                        } else {
+                            console.error('[Create Btn] createAndSaveProjectToDrive did not return a file ID.');
+                            alert('Failed to create the project on Google Drive.');
+                        }
                     } catch (error) {
-                         console.error('[Create Btn] Error during Drive project creation/opening:', error);
-                         alert(`Error creating or opening project: ${error.message || 'Unknown error'}`);
+                        console.error('[Create Btn] Error during Drive project creation/opening:', error);
+                        alert(`Error creating or opening project: ${error.message || 'Unknown error'}`);
                     } finally {
-                         if(window.hideLoadingOverlay) window.hideLoadingOverlay();
+                        if (window.hideLoadingOverlay) window.hideLoadingOverlay();
                     }
                 } else {
                     console.error('createAndSaveProjectToDrive or openProjectFromDrive function not found!');
@@ -438,30 +528,30 @@ function initUI() {
             setTimeout(() => projectNameInput.classList.remove('error'), 500);
         }
     });
-    
+
     // Handle Enter key in project name input
     projectNameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             createProjectBtn.click();
         }
     });
-    
+
     // Night mode toggle
     nightModeToggle.addEventListener('click', toggleNightMode);
-    
+
     // Fullscreen toggle
     fullscreenToggle.addEventListener('click', toggleFullscreen);
-    
+
     // Initialize language selector - Refactored
     setupLanguageSelectorLogic(document.getElementById('welcome-language-selector-clone'), true);
-    
+
     // Initialize menu button
     setupMenuButton();
-    
+
     // New mosaic button
     newMosaicBtn.addEventListener('click', () => {
         dropdownMenu.classList.remove('show');
-        
+
         // --- MODIFICATION: Check for Google Sign-In ---
         console.log('[New Mosaic Btn] Checking googleAccessToken:', window.googleAccessToken);
         if (window.googleAccessToken) {
@@ -479,26 +569,26 @@ function initUI() {
                 if (window.updateSignInStatus) {
                     updateSignInStatus(true); // Make sure drive dashboard is visible
                 }
-                 // Refresh file list when showing the modal this way
+                // Refresh file list when showing the modal this way
                 if (window.listDriveFiles && window.showDriveDashboard) {
                     window.listDriveFiles().then(files => window.showDriveDashboard(files)).catch(err => console.error("Error refreshing drive list:", err));
                 }
-                 // Show modal ON TOP, and request close button visibility
-                 showModal(welcomeModal, true); 
+                // Show modal ON TOP, and request close button visibility
+                showModal(welcomeModal, true);
             }
         } else {
             // Original behavior: Show new project modal for local creation
             showModal(newProjectModal);
             projectNameInput.value = '';
             projectNameInput.focus();
-             // Ensure creating for drive flag is false
+            // Ensure creating for drive flag is false
             if (window.hasOwnProperty('isCreatingForDrive')) {
                 window.isCreatingForDrive = false;
             }
         }
         // --- END MODIFICATION ---
     });
-    
+
     // Save button
     saveButton.addEventListener('click', () => {
         dropdownMenu.classList.remove('show');
@@ -506,11 +596,11 @@ function initUI() {
             saveProject();
         }
     });
-    
+
     // Open button
     uploadButton.addEventListener('click', () => {
         dropdownMenu.classList.remove('show');
-        
+
         // --- MODIFICATION: Check for Google Sign-In ---
         console.log('[Open Project Btn] Checking googleAccessToken:', window.googleAccessToken);
         if (window.googleAccessToken) {
@@ -528,12 +618,12 @@ function initUI() {
                 if (window.updateSignInStatus) {
                     updateSignInStatus(true); // Make sure drive dashboard is visible
                 }
-                 // Refresh file list when showing the modal this way
-                 if (window.listDriveFiles && window.showDriveDashboard) {
+                // Refresh file list when showing the modal this way
+                if (window.listDriveFiles && window.showDriveDashboard) {
                     window.listDriveFiles().then(files => window.showDriveDashboard(files)).catch(err => console.error("Error refreshing drive list:", err));
-                 }
-                 // Show modal ON TOP, and request close button visibility
-                 showModal(welcomeModal, true); 
+                }
+                // Show modal ON TOP, and request close button visibility
+                showModal(welcomeModal, true);
             }
         } else {
             // Original behavior: Trigger local file open dialog
@@ -543,7 +633,7 @@ function initUI() {
         }
         // --- END MODIFICATION ---
     });
-    
+
     // Export button (Image)
     exportButton.addEventListener('click', () => {
         dropdownMenu.classList.remove('show');
@@ -559,7 +649,7 @@ function initUI() {
             exportAsPDF();
         }
     });
-    
+
     // Reset canvas view
     if (resetCanvasBtn) {
         resetCanvasBtn.addEventListener('click', () => {
@@ -569,7 +659,30 @@ function initUI() {
             }
         });
     }
-    
+
+    // Double click on canvas to create a new node
+    canvas.addEventListener('dblclick', function (e) {
+        if (e.target === canvas || e.target === canvasBackground || e.target === canvasContent) {
+            const pos = getCanvasPosition(e);
+            if (window.createNode) {
+                window.createNode(pos.x, pos.y);
+            }
+        }
+    });
+
+    // Click on canvas to clear selection (if not panning)
+    canvas.addEventListener('click', function (e) {
+        if (e.target === canvas || e.target === canvasBackground || e.target === canvasContent) {
+            // Only clear if we didn't just pan (check isPanning or hasDragged logic if needed)
+            // But click usually fires after mouseup, so isPanning is already false.
+            // We can check if mouse moved significantly?
+            // For now, simple click clears selection.
+            if (window.clearSelectedNodes) {
+                window.clearSelectedNodes();
+            }
+        }
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         // Save with Ctrl+S / Cmd+S
@@ -579,11 +692,11 @@ function initUI() {
                 saveProject();
             }
         }
-        
+
         // Open with Ctrl+O / Cmd+O
         if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
             e.preventDefault();
-            
+
             // --- MODIFICATION: Check for Google Sign-In ---
             console.log('[Ctrl+O] Checking googleAccessToken:', window.googleAccessToken);
             if (window.googleAccessToken) {
@@ -601,7 +714,7 @@ function initUI() {
                         updateSignInStatus(true);
                     }
                     if (window.listDriveFiles && window.showDriveDashboard) {
-                         window.listDriveFiles().then(files => window.showDriveDashboard(files)).catch(err => console.error("Error refreshing drive list:", err));
+                        window.listDriveFiles().then(files => window.showDriveDashboard(files)).catch(err => console.error("Error refreshing drive list:", err));
                     }
                     showModal(welcomeModal);
                 }
@@ -613,11 +726,11 @@ function initUI() {
             }
             // --- END MODIFICATION ---
         }
-        
+
         // New with Ctrl+N / Cmd+N
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
-            
+
             // --- MODIFICATION: Check for Google Sign-In ---
             console.log('[Ctrl+N] Checking googleAccessToken:', window.googleAccessToken);
             if (window.googleAccessToken) {
@@ -631,14 +744,14 @@ function initUI() {
                 // document.body.classList.remove('app-active');
 
                 if (welcomeModal) {
-                     if (window.updateSignInStatus) {
-                         updateSignInStatus(true);
+                    if (window.updateSignInStatus) {
+                        updateSignInStatus(true);
                     }
-                     if (window.listDriveFiles && window.showDriveDashboard) {
-                         window.listDriveFiles().then(files => window.showDriveDashboard(files)).catch(err => console.error("Error refreshing drive list:", err));
+                    if (window.listDriveFiles && window.showDriveDashboard) {
+                        window.listDriveFiles().then(files => window.showDriveDashboard(files)).catch(err => console.error("Error refreshing drive list:", err));
                     }
-                     // Show modal ON TOP, and request close button visibility
-                     showModal(welcomeModal, true); 
+                    // Show modal ON TOP, and request close button visibility
+                    showModal(welcomeModal, true);
                 }
             } else {
                 // Original behavior: Show new project modal for local creation
@@ -646,18 +759,18 @@ function initUI() {
                 projectNameInput.value = '';
                 projectNameInput.focus();
                 if (window.hasOwnProperty('isCreatingForDrive')) {
-                     window.isCreatingForDrive = false;
-                 }
+                    window.isCreatingForDrive = false;
+                }
             }
             // --- END MODIFICATION ---
         }
-        
+
         // Exit fullscreen with Escape
         if (e.key === 'Escape' && document.fullscreenElement) {
             document.exitFullscreen();
         }
     });
-    
+
     // Update fullscreen button on fullscreen change
     document.addEventListener('fullscreenchange', updateFullscreenButton);
 
@@ -665,8 +778,8 @@ function initUI() {
     document.addEventListener('click', (e) => {
         const dropdownMenu = document.getElementById('dropdown-menu');
         const menuButton = document.getElementById('menu-button');
-        if (dropdownMenu.classList.contains('show') && 
-            !menuButton.contains(e.target) && 
+        if (dropdownMenu.classList.contains('show') &&
+            !menuButton.contains(e.target) &&
             !dropdownMenu.contains(e.target)) {
             dropdownMenu.classList.remove('show');
         }
@@ -674,29 +787,28 @@ function initUI() {
         // Close welcome modal when clicking outside (if projects are open)
         const activeWelcomeModal = document.getElementById('welcome-modal');
         if (activeWelcomeModal && activeWelcomeModal.classList.contains('active')) {
-             // --- MODIFICATION: Check if projects exist --- 
-             const projectsExist = window.projects && window.projects.length > 0;
-             
-             // Check if projects exist AND the click is outside the modal content
-             if (projectsExist && 
-                 !activeWelcomeModal.querySelector('.modal-content').contains(e.target)) {
-                  
-                 // Check if the click was NOT on a known trigger element (logic remains the same)
-                 // ...
-                 const newTabButton = document.querySelector('.project-tab.new-tab');
-                 if (!menuButton.contains(e.target) && 
-                     !(newTabButton && newTabButton.contains(e.target)) &&
-                     !document.getElementById('new-mosaic-btn').contains(e.target) &&
-                     !document.getElementById('upload-button').contains(e.target)
-                     ) 
-                 {
-                     console.log('[Global Click] Closing welcome modal on outside click (projects exist).');
-                     hideModal(activeWelcomeModal);
-                 }
-             }
-             // --- END MODIFICATION --- 
+            // --- MODIFICATION: Check if projects exist --- 
+            const projectsExist = window.projects && window.projects.length > 0;
+
+            // Check if projects exist AND the click is outside the modal content
+            if (projectsExist &&
+                !activeWelcomeModal.querySelector('.modal-content').contains(e.target)) {
+
+                // Check if the click was NOT on a known trigger element (logic remains the same)
+                // ...
+                const newTabButton = document.querySelector('.project-tab.new-tab');
+                if (!menuButton.contains(e.target) &&
+                    !(newTabButton && newTabButton.contains(e.target)) &&
+                    !document.getElementById('new-mosaic-btn').contains(e.target) &&
+                    !document.getElementById('upload-button').contains(e.target)
+                ) {
+                    console.log('[Global Click] Closing welcome modal on outside click (projects exist).');
+                    hideModal(activeWelcomeModal);
+                }
+            }
+            // --- END MODIFICATION --- 
         }
-        
+
         // Close language dropdowns (logic remains the same)
         // ...
         document.querySelectorAll('.language-selector, .welcome-lang-clone').forEach(selector => {
@@ -763,7 +875,7 @@ function setupLanguageSelectorLogic(selectorElement, isWelcomeClone = false) {
 function initLanguage() {
     // Get browser language
     let browserLang = navigator.language.split('-')[0];
-    
+
     // Check if we support this language
     if (translations[browserLang]) {
         setLanguage(browserLang);
@@ -776,16 +888,16 @@ function initLanguage() {
 // Set the application language
 function setLanguage(lang) {
     if (!translations[lang]) return;
-    
+
     currentLanguage = lang;
-    
+
     // Update language display for ALL selectors
     document.querySelectorAll('.welcome-lang-clone .current-language').forEach(display => {
         if (display) {
             display.textContent = lang.toUpperCase();
         }
     });
-    
+
     // Update UI text
     updateUIText();
 }
@@ -796,32 +908,32 @@ function updateUIText() {
     document.querySelector('#welcome-modal .modal-body > p').textContent = getText('welcomeDescription');
     document.querySelector('#new-project-btn').innerHTML = `<i class="fas fa-plus-circle"></i> ${getText('newProject')}`;
     document.querySelector('#open-project-btn').innerHTML = `<i class="fas fa-folder-open"></i> ${getText('openProject')}`;
-    
+
     // New project modal
     document.querySelector('#new-project-modal .modal-header h2').textContent = getText('createNewProject');
     document.querySelector('#new-project-modal label').textContent = getText('projectName');
     document.querySelector('#project-name').placeholder = getText('projectNamePlaceholder');
     document.querySelector('#create-project-btn').textContent = getText('create');
-    
+
     // Rename project modal (if it exists)
     const renameModal = document.getElementById('rename-project-modal');
     if (renameModal) {
         const modalTitle = renameModal.querySelector('#rename-modal-title');
         if (modalTitle) modalTitle.textContent = getText('renameProject');
-        
+
         const label = renameModal.querySelector('label[for="rename-project-name"]');
         if (label) label.textContent = getText('projectName');
-        
+
         const input = renameModal.querySelector('#rename-project-name');
         if (input) input.placeholder = getText('projectNamePlaceholder');
-        
+
         const saveBtn = renameModal.querySelector('#rename-save-btn');
         if (saveBtn) saveBtn.textContent = getText('save');
-        
+
         const cancelBtn = renameModal.querySelector('.secondary-btn');
         if (cancelBtn) cancelBtn.textContent = getText('cancel');
     }
-    
+
     // Menu items
     document.querySelector('#new-mosaic-btn').textContent = getText('newMosaic');
     document.querySelector('#save-button').textContent = getText('saveProject');
@@ -829,16 +941,16 @@ function updateUIText() {
     document.querySelector('#export-button').textContent = getText('exportImage');
     document.querySelector('#export-pdf-button').textContent = getText('exportPDF'); // Set text for PDF button
     document.querySelector('#reset-canvas').textContent = getText('resetView');
-    
+
     // Tooltips
     const nightModeToggle = document.getElementById('night-mode-toggle');
     if (nightModeToggle) nightModeToggle.title = getText('toggleNightMode');
-    
+
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
     if (fullscreenToggle) fullscreenToggle.title = getText('toggleFullscreen');
-    
+
     // Update project tabs tooltips (handled in updateProjectTabs)
-    
+
     // --- ADDED: Update Drive Dashboard Buttons Text ---
     const driveNewProjectBtn = document.getElementById('drive-new-project-btn');
     if (driveNewProjectBtn) {
@@ -852,29 +964,29 @@ function updateUIText() {
     if (signOutBtn) {
         signOutBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${getText('driveSignOut') || 'Sign Out'}`;
     }
-     const driveTitle = document.querySelector('#drive-dashboard .drive-title');
-     if (driveTitle) {
-         driveTitle.textContent = getText('googleDriveProjectsTitle') || 'Google Drive Projects';
-     }
-     const driveLoading = document.querySelector('#drive-file-list .drive-loading');
-     if (driveLoading) {
-         // Update loading text only if it's currently visible/relevant
-         // Might need more context awareness
-         // driveLoading.textContent = getText('driveLoadingProjects') || 'Loading projects...';
-     }
-     const driveEmpty = document.querySelector('#drive-file-list .drive-empty');
-     if (driveEmpty) {
-         // Update empty text if it's currently visible
-         driveEmpty.textContent = getText('driveEmpty') || 'No Mosaic projects found...';
-     }
+    const driveTitle = document.querySelector('#drive-dashboard .drive-title');
+    if (driveTitle) {
+        driveTitle.textContent = getText('googleDriveProjectsTitle') || 'Google Drive Projects';
+    }
+    const driveLoading = document.querySelector('#drive-file-list .drive-loading');
+    if (driveLoading) {
+        // Update loading text only if it's currently visible/relevant
+        // Might need more context awareness
+        // driveLoading.textContent = getText('driveLoadingProjects') || 'Loading projects...';
+    }
+    const driveEmpty = document.querySelector('#drive-file-list .drive-empty');
+    if (driveEmpty) {
+        // Update empty text if it's currently visible
+        driveEmpty.textContent = getText('driveEmpty') || 'No Mosaic projects found...';
+    }
     // --- END ADDED ---
 }
 
 // Show a modal - Updated for conditional UI based on open projects
-function showModal(modal, showCloseButton = false) { 
+function showModal(modal, showCloseButton = false) {
     if (!modal) return;
     modal.style.display = 'flex';
-    
+
     // --- MODIFICATION: Check if projects exist --- 
     const projectsExist = window.projects && window.projects.length > 0;
     console.log(`[showModal] Projects exist? ${projectsExist}`);
@@ -882,16 +994,16 @@ function showModal(modal, showCloseButton = false) {
     // const backgroundVideo = document.getElementById('background-video');
     // const isVideoVisible = backgroundVideo && backgroundVideo.style.display !== 'none';
     // console.log(`[showModal] Is video visible? ${isVideoVisible}`);
-    
+
     // --- MODIFICATION: Conditional UI for Welcome Modal based on Projects --- 
     if (modal.id === 'welcome-modal') {
         const closeBtn = document.getElementById('welcome-modal-close-btn');
         const langClone = document.getElementById('welcome-language-selector-clone');
         const coverImage = modal.querySelector('.cover-image');
         const modalFooter = modal.querySelector('.modal-footer');
-        
+
         // Show close button only if requested (triggered while projects exist)
-        if (showCloseButton && closeBtn) { 
+        if (showCloseButton && closeBtn) {
             console.log('[showModal] Found close button, setting display to block.');
             closeBtn.style.display = 'block';
             if (!closeBtn.dataset.listenerAttached) {
@@ -899,12 +1011,12 @@ function showModal(modal, showCloseButton = false) {
                 closeBtn.dataset.listenerAttached = 'true';
             }
         } else if (closeBtn) {
-            closeBtn.style.display = 'none'; 
+            closeBtn.style.display = 'none';
         }
-        
+
         // Hide language selector clone if projects exist
         if (langClone) {
-            langClone.style.display = projectsExist ? 'none' : 'flex'; 
+            langClone.style.display = projectsExist ? 'none' : 'flex';
             console.log('[showModal] Language clone display set to:', langClone.style.display);
         }
 
@@ -920,30 +1032,30 @@ function showModal(modal, showCloseButton = false) {
         // --- END ADDED ---
     }
     // --- END MODIFICATION ---
-    
+
     setTimeout(() => {
         modal.classList.add('active');
         // --- MODIFICATION: Add body class conditionally for Welcome Modal based on Projects --- 
-        if (modal.id === 'new-project-modal' || modal.id === 'rename-project-modal' || 
-           (modal.id === 'welcome-modal' && projectsExist)) { // Only apply blur if projects exist
-             document.body.classList.add('body-modal-active');
-             console.log('[showModal] Added body-modal-active class (projects exist).');
+        if (modal.id === 'new-project-modal' || modal.id === 'rename-project-modal' ||
+            (modal.id === 'welcome-modal' && projectsExist)) { // Only apply blur if projects exist
+            document.body.classList.add('body-modal-active');
+            console.log('[showModal] Added body-modal-active class (projects exist).');
         } else {
-             // Ensure class is removed if welcome modal shown initially (no projects)
-             if (modal.id === 'welcome-modal' && !projectsExist) {
-                 document.body.classList.remove('body-modal-active');
-                 console.log('[showModal] Removed body-modal-active class (no projects).');
-             }
+            // Ensure class is removed if welcome modal shown initially (no projects)
+            if (modal.id === 'welcome-modal' && !projectsExist) {
+                document.body.classList.remove('body-modal-active');
+                console.log('[showModal] Removed body-modal-active class (no projects).');
+            }
         }
         // --- END MODIFICATION ---
-    }, 10); 
+    }, 10);
 }
 
 // Hide a modal
 function hideModal(modal) {
     if (!modal) return;
     modal.classList.remove('active');
-    
+
     // --- MODIFICATION: Hide close button when welcome modal closes --- 
     if (modal.id === 'welcome-modal') {
         const closeBtn = document.getElementById('welcome-modal-close-btn');
@@ -952,13 +1064,13 @@ function hideModal(modal) {
         }
     }
     // --- END MODIFICATION ---
-    
+
     // Remove body class (already handles all relevant modal IDs)
     if (modal.id === 'new-project-modal' || modal.id === 'rename-project-modal' || modal.id === 'welcome-modal') {
-         document.body.classList.remove('body-modal-active');
-         console.log('[hideModal] Removed body-modal-active class.');
+        document.body.classList.remove('body-modal-active');
+        console.log('[hideModal] Removed body-modal-active class.');
     }
-    
+
     // Wait for animation to finish before setting display to none
     // Use the transition duration from CSS (0.3s = 300ms)
     setTimeout(() => {
@@ -969,7 +1081,7 @@ function hideModal(modal) {
 // Toggle night mode
 function toggleNightMode() {
     document.body.classList.toggle('night-mode');
-    
+
     // Update connections to reflect the new color scheme
     if (window.updateNodeConnections) {
         updateNodeConnections();
@@ -993,10 +1105,10 @@ function toggleFullscreen() {
 function updateFullscreenButton() {
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
     if (!fullscreenToggle) return;
-    
+
     const enterIcon = fullscreenToggle.querySelector('.fullscreen-enter');
     const exitIcon = fullscreenToggle.querySelector('.fullscreen-exit');
-    
+
     if (document.fullscreenElement) {
         // Show exit fullscreen icon
         enterIcon.style.display = 'none';
@@ -1014,15 +1126,25 @@ function clearMindMap() {
     document.querySelectorAll('.node').forEach(node => {
         node.remove();
     });
-    
+
     // Remove all connection SVGs
     document.querySelectorAll('.connection-container').forEach(svg => {
         svg.remove();
     });
 
+    // Remove all groups
+    document.querySelectorAll('.group').forEach(group => {
+        group.remove();
+    });
+
     // Clear selected nodes set
     if (window.selectedNodes) {
         window.selectedNodes.clear();
+    }
+
+    // Clear groups map
+    if (window.groups) {
+        window.groups.clear();
     }
 }
 
@@ -1031,12 +1153,12 @@ function setupMenuButton() {
     const menuButton = document.getElementById('menu-button');
     const dropdownMenu = document.getElementById('dropdown-menu');
     if (!menuButton || !dropdownMenu) return;
-    
+
     menuButton.addEventListener('click', (e) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         dropdownMenu.classList.toggle('show');
     });
-    
+
     // REMOVED: Global click listener moved to initUI
 }
 

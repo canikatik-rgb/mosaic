@@ -777,6 +777,12 @@ const debouncedSaveToDrive = () => {
 
 // Function to call whenever a change occurs that should trigger an auto-save
 function scheduleAutoSave() {
+    // Check if restoration is in progress
+    if (window.isRestoringProject) {
+        console.log("[scheduleAutoSave] Skipped: Project restoration in progress.");
+        return;
+    }
+
     // Only schedule if sync is enabled and user is logged in
     if (isDriveSyncEnabled && googleAccessToken) {
         console.log("[scheduleAutoSave] Triggered."); // Log trigger

@@ -20,6 +20,7 @@ let altKeyDown = false; // Track alt/option key state
 let isDuplicating = false; // Track if we're in duplication mode
 let duplicatedNodes = []; // Store duplicated nodes
 let copiedNodes = []; // Store copied nodes for clipboard operations
+let hasDragged = false; // Track if a drag operation actually moved the node
 
 // Standard colors for node strip
 const stripColors = [
@@ -68,6 +69,11 @@ function createInitialNode() {
     // Center canvas on welcome node
     if (window.centerCanvas) {
         window.centerCanvas();
+    }
+
+    // Auto-select the welcome node
+    if (newNode) {
+        selectNode(newNode, false);
     }
 }
 
@@ -226,11 +232,23 @@ function setupNodeEvents(node, strip, contentDiv, leftPin, rightPin) {
 
             e.stopPropagation(); // Prevent canvas panning
 
-            // Select the node on mousedown, respect shift key for multi-select intent
-            selectNode(node, e.shiftKey || shiftKeyDown);
+            // Multi-selection drag logic
+            const isSelected = selectedNodes.has(node);
+            const isShift = e.shiftKey || shiftKeyDown;
+
+            if (!isSelected && !isShift) {
+                // If clicking an unselected node without shift, select it (clearing others)
+                selectNode(node, false);
+            } else if (!isSelected && isShift) {
+                // If clicking unselected with shift, add to selection
+                selectNode(node, true);
+            }
+            // If clicking a selected node, DO NOT deselect others yet. 
+            // We wait to see if it's a drag or a click.
 
             isDraggingNode = true;
             draggedNode = node;
+            hasDragged = false; // Reset drag flag
 
             const rect = node.getBoundingClientRect();
             nodeOffsetX = e.clientX - rect.left;
@@ -252,11 +270,16 @@ function setupNodeEvents(node, strip, contentDiv, leftPin, rightPin) {
             document.addEventListener('mousemove', moveNode);
             document.addEventListener('mouseup', stopNodeDrag);
 
-            node.classList.add('dragging');
+            // We don't add 'dragging' class immediately to avoid visual glitch on simple click
+            // node.classList.add('dragging'); 
         });
 
         // Add direct click handler for node selection
-        node.addEventListener('click', handleNodeSelection);
+        node.addEventListener('click', (e) => {
+            // If we dragged, don't process click for selection
+            if (hasDragged) return;
+            handleNodeSelection(e);
+        });
     }
 
     // Strip double-click for color palette
@@ -328,7 +351,16 @@ function setupNodeEvents(node, strip, contentDiv, leftPin, rightPin) {
             }
         } else {
             // Normal selection behavior (without shift)
-            if (selectedNodes.has(node) && selectedNodes.size === 1) {
+            // If we are here, it means we clicked a node without dragging.
+            // If it was already selected (and others were too), we should now clear others.
+            if (selectedNodes.size > 1 && selectedNodes.has(node)) {
+                selectNode(node, false); // Select only this one
+            } else if (selectedNodes.has(node) && selectedNodes.size === 1) {
+                // If it's the only one selected, maybe deselect? 
+                // Standard behavior is usually to keep it selected. 
+                // But the user might want to toggle.
+                // Let's keep it selected to be safe, or toggle if that's the pattern.
+                // Current code toggles. Let's stick to that for single selection.
                 deselectNode(node);
             } else {
                 selectNode(node, false);
@@ -340,6 +372,8 @@ function setupNodeEvents(node, strip, contentDiv, leftPin, rightPin) {
 // Node movement handler - Updated for alt-key duplication
 function moveNode(e) {
     if (!isDraggingNode || !draggedNode) return;
+
+    hasDragged = true; // Mark that we have actually moved
 
     // Check if this is the first movement with Alt key pressed
     if (altKeyDown && !isDuplicating && selectedNodes.size > 0) {
@@ -409,6 +443,20 @@ function moveNode(e) {
     // Schedule viewport update (throttled by the manager itself)
     if (window.viewportManager) {
         window.viewportManager.scheduleUpdate();
+    }
+
+    // Update group bounds if any of the moved nodes are in a group
+    if (window.getGroupForNode && window.updateGroupBounds) {
+        const movedNodes = selectedNodes.size > 0 ? Array.from(selectedNodes) : [draggedNode];
+        const updatedGroups = new Set();
+
+        movedNodes.forEach(node => {
+            const group = window.getGroupForNode(node.id);
+            if (group && !updatedGroups.has(group.id)) {
+                window.updateGroupBounds(group);
+                updatedGroups.add(group.id);
+            }
+        });
     }
 
     // Update switcher position if open
@@ -509,9 +557,15 @@ function selectNode(node, isMultiSelect = false) {
         clearSelectedNodes();
     }
 
-    // Add to selected set and apply selected class
+    // Add to selected set
     selectedNodes.add(node);
     node.classList.add('selected');
+
+    // Notify Action Bar
+    if (window.actionBar) {
+        window.actionBar.update(selectedNodes.size);
+    }
+    window.dispatchEvent(new CustomEvent('selectionChanged', { detail: { count: selectedNodes.size } }));
 
     // If node is in content-only mode (invisible), ensure it remains visible while selected
     // We don't remove the content-only-mode class, just ensure it's visible by CSS rules
@@ -525,6 +579,12 @@ function deselectNode(node) {
     // Remove from selected set and remove selected class
     node.classList.remove('selected');
     selectedNodes.delete(node);
+
+    // Notify Action Bar
+    if (window.actionBar) {
+        window.actionBar.update(selectedNodes.size);
+    }
+    window.dispatchEvent(new CustomEvent('selectionChanged', { detail: { count: selectedNodes.size } }));
 
     // When deselecting, let the node go back to its previous visibility state
     // which is handled by CSS, the content-only-mode class remains if it was there
@@ -575,6 +635,14 @@ function deleteNode(node) {
     // Remove connections first
     if (window.removeNodeConnections) {
         window.removeNodeConnections(node);
+    }
+
+    // Remove the node from any group it belongs to
+    if (window.getGroupForNode && window.removeNodeFromGroup) {
+        const group = window.getGroupForNode(node.id);
+        if (group) {
+            window.removeNodeFromGroup(node.id, group.id);
+        }
     }
 
     // Remove the node from selected nodes if present
@@ -843,6 +911,63 @@ function setupContentEditing(contentDiv, node) {
         range.collapse(false); // Collapse to end
         sel.removeAllRanges();
         sel.addRange(range);
+    });
+
+    // Handle Tab key to create connected node
+    contentDiv.addEventListener('keydown', e => {
+        if (e.key === 'Tab' && contentDiv.isContentEditable && contentDiv.contentEditable === 'true') {
+            e.preventDefault();
+
+            // Get current node position and color
+            const currentNodeX = parseInt(node.style.left) || 0;
+            const currentNodeY = parseInt(node.style.top) || 0;
+            const currentNodeWidth = node.offsetWidth || 200;
+            const currentNodeHeight = node.offsetHeight || 100;
+
+            // Get strip color from current node
+            const stripElement = node.querySelector('.strip');
+            const stripColor = stripElement ? stripElement.style.backgroundColor : '#67a772';
+
+            // Calculate new node position (to the right, non-overlapping)
+            const gap = 150; // Increased gap for better spacing
+            const newX = currentNodeX + currentNodeWidth + gap;
+            const newY = currentNodeY;
+
+            // Finish editing current node
+            contentDiv.blur();
+
+            // Create new node
+            const nodeType = node.dataset.nodeType || 'default';
+            const newNode = createNode(newX, newY, null, nodeType, null, stripColor);
+
+            if (newNode) {
+                // Create connection from current node to new node using IDs
+                if (window.createConnection) {
+                    // createConnection expects: (sourceNodeId, targetNodeId, sourcePin, targetPin, color)
+                    window.createConnection(node.id, newNode.id, 'right', 'left', null);
+                }
+
+                // Pan viewport to the new node
+                if (window.viewportManager && window.viewportManager.panToNode) {
+                    setTimeout(() => {
+                        window.viewportManager.panToNode(newNode, true);
+                    }, 100);
+                }
+
+                // Auto-edit the new node
+                setTimeout(() => {
+                    const newContentDiv = newNode.querySelector('.content');
+                    if (newContentDiv) {
+                        // Simulate double-click to enter edit mode
+                        const dblClickEvent = new MouseEvent('dblclick', {
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        newContentDiv.dispatchEvent(dblClickEvent);
+                    }
+                }, 200);
+            }
+        }
     });
 
     // Handle content changes while editing (input event)
@@ -1220,6 +1345,12 @@ function endShiftSelection(e) {
     // Remove event listeners
     document.removeEventListener('mousemove', updateShiftSelection);
     document.removeEventListener('mouseup', endShiftSelection);
+
+    // Set a flag to prevent the click event (which fires after mouseup) from clearing the selection
+    window.justFinishedShiftSelection = true;
+    setTimeout(() => {
+        window.justFinishedShiftSelection = false;
+    }, 100);
 }
 
 // Initialize node management system
@@ -1507,8 +1638,24 @@ function startMediaResize(e, media, corner) {
 function clearSelectedNodes() {
     selectedNodes.forEach(node => {
         node.classList.remove('selected');
+
+        // Clear any search highlights
+        if (node.dataset.hasHighlight) {
+            const highlights = node.querySelectorAll('.search-highlight');
+            highlights.forEach(highlight => {
+                const text = highlight.textContent;
+                highlight.replaceWith(document.createTextNode(text));
+            });
+            delete node.dataset.hasHighlight;
+        }
     });
     selectedNodes.clear();
+
+    // Notify Action Bar
+    if (window.actionBar) {
+        window.actionBar.update(0);
+    }
+    window.dispatchEvent(new CustomEvent('selectionChanged', { detail: { count: 0 } }));
 }
 
 // Export functions to global scope
